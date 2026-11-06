@@ -1,0 +1,366 @@
+{
+ "type": "FeatureCollection",
+ "name": "claude_us_compute_sites",
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -86.51,
+     41.7
+    ]
+   },
+   "properties": {
+    "id": "new-carlisle",
+    "name": "Project Rainier — New Carlisle",
+    "host": "Amazon Web Services",
+    "partner": "AWS (Anthropic dedicated)",
+    "place": "New Carlisle, Indiana",
+    "state": "IN",
+    "mw": 1037,
+    "mw_note": "≈1 GW IT load today; expansion planned",
+    "status": "operating",
+    "status_note": "Operating; more buildings still being added",
+    "confidence": "Reported by multiple outlets; widely documented",
+    "note": "Anthropic–Amazon Project Rainier"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -90.037,
+     32.612
+    ]
+   },
+   "properties": {
+    "id": "canton-ms",
+    "name": "AWS Canton campus",
+    "host": "Amazon Web Services",
+    "partner": "AWS",
+    "place": "Canton (Madison County), Mississippi",
+    "state": "MS",
+    "mw": 500,
+    "mw_note": ">500 MW waiting on a substation due 2027",
+    "status": "operating",
+    "status_note": "Operating; later phases need a substation (2027)",
+    "confidence": "Single-source report; link to Anthropic is less certain",
+    "note": "Listed as an Anthropic AWS campus by Measured AI; flagged speculative by another tracker"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -90.132,
+     32.428
+    ]
+   },
+   "properties": {
+    "id": "ridgeland-ms",
+    "name": "AWS Ridgeland campus",
+    "host": "Amazon Web Services",
+    "partner": "AWS",
+    "place": "Ridgeland (Madison County), Mississippi",
+    "state": "MS",
+    "mw": null,
+    "mw_note": "Capacity not stated",
+    "status": "operating",
+    "status_note": "Operating; later phases need substations/generation",
+    "confidence": "Single-source report; link to Anthropic is less certain",
+    "note": "Listed as an Anthropic AWS campus by Measured AI; flagged speculative by another tracker"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.149,
+     41.092
+    ]
+   },
+   "properties": {
+    "id": "susquehanna-pa",
+    "name": "AWS Susquehanna campus",
+    "host": "Amazon Web Services",
+    "partner": "AWS",
+    "place": "Salem Township / Berwick, Pennsylvania",
+    "state": "PA",
+    "mw": null,
+    "mw_note": "Capacity not stated",
+    "status": "operating",
+    "status_note": "Operating; dedicated transmission lines not due until 2028",
+    "confidence": "Single-source report; link to Anthropic is less certain",
+    "note": "Listed as an Anthropic AWS campus by Measured AI; flagged speculative by another tracker"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -90.052,
+     35.06
+    ]
+   },
+   "properties": {
+    "id": "colossus-1",
+    "name": "Colossus 1",
+    "host": "SpaceX",
+    "partner": "SpaceX (short-term compute)",
+    "place": "Memphis, Tennessee",
+    "state": "TN",
+    "mw": 300,
+    "mw_note": "More than 300 MW, 220,000+ NVIDIA GPUs",
+    "status": "operating",
+    "status_note": "Operating for Anthropic since May 2026",
+    "confidence": "Announced by Anthropic (May 2026); city per third-party reporting",
+    "note": "Anthropic named Colossus 1 but not its location"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -90.013,
+     34.989
+    ]
+   },
+   "properties": {
+    "id": "colossus-2",
+    "name": "Colossus 2",
+    "host": "SpaceX",
+    "partner": "SpaceX (short-term compute)",
+    "place": "Southaven (DeSoto County), Mississippi",
+    "state": "MS",
+    "mw": null,
+    "mw_note": "Part of ~500 MW across Colossus 1 + 2",
+    "status": "operating",
+    "status_note": "Operating for Anthropic since May 2026",
+    "confidence": "Third-party reporting; location not stated by Anthropic",
+    "note": "Site assignment per third-party reporting"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -78.603,
+     43.358
+    ]
+   },
+   "properties": {
+    "id": "lake-mariner",
+    "name": "Lake Mariner",
+    "host": "TeraWulf",
+    "partner": "Fluidstack (Anthropic tenant)",
+    "place": "Barker, New York",
+    "state": "NY",
+    "mw": 378,
+    "mw_note": "378 MW contracted; first 42 MW online July 2026",
+    "status": "operating",
+    "status_note": "Partly online (July 2026); more halls due late 2026–2027",
+    "confidence": "Reported; site matches Anthropic's Nov 2025 'New York' announcement",
+    "note": "Anthropic did not name the exact New York site"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -100.865,
+     32.388
+    ]
+   },
+   "properties": {
+    "id": "barber-lake",
+    "name": "Barber Lake",
+    "host": "Cipher Digital",
+    "partner": "Fluidstack (Anthropic tenant)",
+    "place": "Colorado City (Mitchell County), Texas",
+    "state": "TX",
+    "mw": 207,
+    "mw_note": "207 MW; first 168 MW phase targeted Sept 30, 2026",
+    "status": "development",
+    "status_note": "First phase targeted Sept 30, 2026",
+    "confidence": "Reported; Texas site per Anthropic's Nov 2025 announcement is not named",
+    "note": "Anthropic did not name the exact Texas site"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -101.843,
+     33.832
+    ]
+   },
+   "properties": {
+    "id": "abernathy",
+    "name": "Abernathy HPC campus",
+    "host": "Fluidstack-led investor group",
+    "partner": "Fluidstack (Anthropic tenant)",
+    "place": "Abernathy (Hale County), Texas",
+    "state": "TX",
+    "mw": 168,
+    "mw_note": "168 MW reported",
+    "status": "development",
+    "status_note": "Expected to begin delivering in 2H 2026",
+    "confidence": "Reported; Anthropic tie is per third-party tracker",
+    "note": "Anthropic did not name the exact Texas site"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -91.35,
+     30.77
+    ]
+   },
+   "properties": {
+    "id": "river-bend",
+    "name": "River Bend campus",
+    "host": "Hut 8",
+    "partner": "Fluidstack (Anthropic tenant)",
+    "place": "St. Francisville (West Feliciana Parish), Louisiana",
+    "state": "LA",
+    "mw": 245,
+    "mw_note": "245 MW contracted",
+    "status": "development",
+    "status_note": "Pre-delivery; first 65 MW hall targeted Q2 2027",
+    "confidence": "Reported",
+    "note": "Location approximate (near St. Francisville)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -87.45,
+     39.07
+    ]
+   },
+   "properties": {
+    "id": "meridian-arc",
+    "name": "Meridian Arc",
+    "host": "Meridian Compute JV (Fluidstack / Next Frontier)",
+    "partner": "Fluidstack (Anthropic tenant)",
+    "place": "New Lebanon (Sullivan County), Indiana",
+    "state": "IN",
+    "mw": 430,
+    "mw_note": "≈430 MW across two buildings",
+    "status": "development",
+    "status_note": "Planned; first 65 MW hall targeted July 2027",
+    "confidence": "Reported",
+    "note": "Location approximate (county-level)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -86.748,
+     37.9
+    ]
+   },
+   "properties": {
+    "id": "justified",
+    "name": "Justified Data Campus",
+    "host": "TeraWulf",
+    "partner": "Direct lease (Anthropic tenant)",
+    "place": "Hawesville (Hancock County), Kentucky",
+    "state": "KY",
+    "mw": 401,
+    "mw_note": "401 MW",
+    "status": "development",
+    "status_note": "Under development; first capacity 2H 2027, full early 2028",
+    "confidence": "Reported",
+    "note": "Anthropic is the named tenant"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -97.001,
+     30.655
+    ]
+   },
+   "properties": {
+    "id": "rockdale",
+    "name": "Rockdale campus",
+    "host": "Riot Platforms",
+    "partner": "Direct lease (Anthropic tenant)",
+    "place": "Rockdale (Milam County), Texas",
+    "state": "TX",
+    "mw": 191,
+    "mw_note": "191 MW at full build",
+    "status": "development",
+    "status_note": "Land cleared; 96 MW targeted Dec 2027, 191 MW by June 2028",
+    "confidence": "Reported",
+    "note": "Anthropic is the named tenant"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -96.796,
+     31.842
+    ]
+   },
+   "properties": {
+    "id": "nexus-hubbard",
+    "name": "Nexus Hubbard",
+    "host": "Nexus Data Centers",
+    "partner": "Direct lease (Anthropic tenant; Google-backed)",
+    "place": "Hubbard (Hill County), Texas",
+    "state": "TX",
+    "mw": 500,
+    "mw_note": "≈500 MW first phase; campus could reach ~7.7 GW",
+    "status": "development",
+    "status_note": "Under construction; first delivery expected Q4 2027",
+    "confidence": "Reported; Google guarantees Anthropic's lease",
+    "note": "Anthropic is the named tenant"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -82.138,
+     38.845
+    ]
+   },
+   "properties": {
+    "id": "monarch",
+    "name": "Monarch Compute Campus",
+    "host": "Nscale",
+    "partner": "Nscale (owner-operator)",
+    "place": "Point Pleasant (Mason County), West Virginia",
+    "state": "WV",
+    "mw": 460,
+    "mw_note": "460 MW for Anthropic; campus design 1.35 GW",
+    "status": "development",
+    "status_note": "Agreement signed Aug 26, 2026; delivery from late 2027",
+    "confidence": "Reported",
+    "note": "Newest agreement in this list"
+   }
+  }
+ ]
+}
