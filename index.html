@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Where Claude Runs — US Compute Sites</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<style>
+  :root{--red:#ff2a3a;--red-dim:#c2202e;--bg:rgba(10,10,13,.86);--line:rgba(255,255,255,.10);--txt:#ececf0;--mute:#9a9aa6}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:#0b0b0e;color:var(--txt);font-family:Inter,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  #map{position:absolute;inset:0}
+  .panel{position:absolute;z-index:2;background:var(--bg);border:1px solid var(--line);border-radius:12px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+  #side{top:16px;left:16px;bottom:16px;width:330px;display:flex;flex-direction:column;padding:16px 0 0}
+  #side header{padding:0 16px 12px;border-bottom:1px solid var(--line)}
+  #side h1{margin:0;font-size:18px;font-weight:650;letter-spacing:.2px}
+  #side .sub{margin:4px 0 0;font-size:12px;color:var(--mute);line-height:1.4}
+  .stats{display:flex;gap:18px;margin-top:10px}
+  .stats b{display:block;color:var(--red);font-size:22px;line-height:1.1}
+  .stats span{font-size:11px;color:var(--mute)}
+  .legend{margin-top:10px;display:grid;gap:6px;font-size:12px}
+  .legend div{display:flex;align-items:center;gap:8px}
+  .lp{width:12px;height:12px;border-radius:50%;flex:none;background:var(--red);animation:pulse 1.5s infinite}
+  .lp.dev{background:var(--red-dim);animation-duration:2.8s;opacity:.85}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,42,58,.7)}100%{box-shadow:0 0 0 12px rgba(255,42,58,0)}}
+  #list{overflow:auto;flex:1;padding:6px 0}
+  .item{padding:9px 16px;cursor:pointer;border-left:3px solid transparent}
+  .item:hover,.item.on{background:rgba(255,42,58,.08);border-left-color:var(--red)}
+  .item .n{font-size:13px;font-weight:600;color:#fff}
+  .item .m{font-size:11.5px;color:var(--mute);margin-top:2px}
+  .item .tag{display:inline-block;font-size:10px;letter-spacing:.4px;text-transform:uppercase;padding:1px 6px;border-radius:99px;margin-left:6px;vertical-align:1px}
+  .tag.operating{background:rgba(255,42,58,.18);color:#ff7380}
+  .tag.development{background:rgba(255,255,255,.08);color:#b4b4be}
+  #foot{padding:10px 16px;border-top:1px solid var(--line);font-size:10.5px;color:var(--mute);line-height:1.45}
+  #foot a{color:#d6d6de}
+  .maplibregl-popup-content{background:#14141a;color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:13px 15px;font-size:12.5px;line-height:1.5;max-width:300px;box-shadow:0 8px 30px rgba(0,0,0,.6)}
+  .maplibregl-popup-close-button{color:#bbb;font-size:18px}
+  .maplibregl-popup-anchor-top .maplibregl-popup-tip,.maplibregl-popup-anchor-top-left .maplibregl-popup-tip,.maplibregl-popup-anchor-top-right .maplibregl-popup-tip{border-bottom-color:#14141a}
+  .maplibregl-popup-anchor-bottom .maplibregl-popup-tip,.maplibregl-popup-anchor-bottom-left .maplibregl-popup-tip,.maplibregl-popup-anchor-bottom-right .maplibregl-popup-tip{border-top-color:#14141a}
+  .maplibregl-popup-anchor-left .maplibregl-popup-tip{border-right-color:#14141a}
+  .maplibregl-popup-anchor-right .maplibregl-popup-tip{border-left-color:#14141a}
+  .pop h3{margin:0 0 2px;font-size:14px;color:#fff}
+  .pop .co{color:var(--red);font-weight:600}
+  .pop .row{color:var(--txt)} .pop .mute{color:var(--mute)}
+  .pop .k{color:var(--mute)}
+  .pop .note{margin-top:7px;padding-top:7px;border-top:1px solid var(--line);font-size:11px;color:var(--mute)}
+  .hover .maplibregl-popup-content{padding:6px 10px;font-size:12px;font-weight:600}
+  .maplibregl-ctrl-attrib{background:rgba(10,10,13,.7)!important}
+  .maplibregl-ctrl-attrib a{color:#bbb!important}
+  @media (max-width:720px){
+    #side{top:auto;left:8px;right:8px;bottom:8px;width:auto;height:42%}
+    #foot{display:none}
+  }
+</style>
+</head>
+<body>
+<div id="map"></div>
+
+<aside id="side" class="panel">
+  <header>
+    <h1>Where Claude runs</h1>
+    <p class="sub">US compute sites tied to Anthropic, from public reporting. Not an official Anthropic map.</p>
+    <div class="stats">
+      <div><b id="s-n">0</b><span>sites</span></div>
+      <div><b id="s-op">0</b><span>operating</span></div>
+      <div><b id="s-gw">0</b><span>GW reported*</span></div>
+    </div>
+    <div class="legend">
+      <div><span class="lp"></span>Operating — fast pulse</div>
+      <div><span class="lp dev"></span>In development — slow pulse</div>
+      <div style="color:var(--mute)">Bigger pulse = more reported capacity (MW)</div>
+    </div>
+  </header>
+  <div id="list"></div>
+  <div id="foot">
+    *Sum of capacities that are stated; several sites have none. Locations are approximate (town or county level). Status as of the sources' dates (Aug 31, 2026 and later reports). Anthropic has not published a full site list.
+    Sources: public reporting incl. <a href="https://measuredai.substack.com/p/anthropic-data-centers" target="_blank" rel="noopener">Measured AI</a>,
+    <a href="https://epoch.ai/data/ai-data-centers/directory/anthropic-amazon-new-carlisle" target="_blank" rel="noopener">Epoch AI</a>,
+    <a href="https://www.anthropic.com/news/higher-limits-spacex" target="_blank" rel="noopener">Anthropic</a>.
+  </div>
+</aside>
+
+<script>
+const DATA = {
+ "type": "FeatureCollection",
+ "name": "claude_us_compute_sites",
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -86.51,
+     41.7
+    ]
+   },
+   "properties": {
+    "id": "new-carlisle",
+    "name": "Project Rainier — New Carlisle",
+    "host": "Amazon Web Services",
+    "partner": "AWS (Anthropic dedicated)",
+    "place": "New Carlisle, Indiana",
+    "state": "IN",
+    "mw": 1037,
+    "mw_note": "≈1 GW IT load today; expansion planned",
+    "status": "operating",
+    "status_note": "Operating; more buildings still being added",
+    "confidence": "Reported by multiple outlets; widely documented",
+    "note": "Anthropic–Amazon Project Rainier"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -90.037,
+     32.612
+    ]
+   },
+   "properties": {
+    "id": "canton-ms",
+    "name": "AWS Canton campus",
+    "host": "Amazon Web Services",
+    "partner": "AWS",
+    "place": "Canton (Madison County), Mississippi",
+    "state": "MS",
+    "mw": 500,
+    "mw_note": ">500 MW waiting on a substation due 2027",
+    "status": "operating",
+    "status_note": "Operating; later phases need a substation (2027)",
+    "confidence": "Single-source report; link to Anthropic is less certain",
+    "note": "Listed as an Anthropic AWS campus by Measured AI; flagged speculative by another tracker"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -90.132,
+     32.428
+    ]
+   },
+   "properties": {
+    "id": "ridgeland-ms",
+    "name": "AWS Ridgeland campus",
+    "host": "Amazon Web Services",
+    "partner": "AWS",
+    "place": "Ridgeland (Madison County), Mississippi",
+    "state": "MS",
+    "mw": null,
+    "mw_note": "Capacity not stated",
+    "status": "operating",
+    "status_note": "Operating; later phases need substations/generation",
+    "confidence": "Single-source report; link to Anthropic is less certain",
+    "note": "Listed as an Anthropic AWS campus by Measured AI; flagged speculative by another tracker"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.149,
+     41.092
+    ]
+   },
+   "properties": {
+    "id": "susquehanna-pa",
+    "name": "AWS Susquehanna campus",
+    "host": "Amazon Web Services",
+    "partner": "AWS",
+    "place": "Salem Township / Berwick, Pennsylvania",
+    "state": "PA",
+    "mw": null,
+    "mw_note": "Capacity not stated",
+    "status": "operating",
+    "status_note": "Operating; dedicated transmission lines not due until 2028",
+    "confidence": "Single-source report; link to Anthropic is less certain",
+    "note": "Listed as an Anthropic AWS campus by Measured AI; flagged speculative by another tracker"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -90.052,
+     35.06
+    ]
+   },
+   "properties": {
+    "id": "colossus-1",
+    "name": "Colossus 1",
+    "host": "SpaceX",
+    "partner": "SpaceX (short-term compute)",
+    "place": "Memphis, Tennessee",
+    "state": "TN",
+    "mw": 300,
+    "mw_note": "More than 300 MW, 220,000+ NVIDIA GPUs",
+    "status": "operating",
+    "status_note": "Operating for Anthropic since May 2026",
+    "confidence": "Announced by Anthropic (May 2026); city per third-party reporting",
+    "note": "Anthropic named Colossus 1 but not its location"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -90.013,
+     34.989
+    ]
+   },
+   "properties": {
+    "id": "colossus-2",
+    "name": "Colossus 2",
+    "host": "SpaceX",
+    "partner": "SpaceX (short-term compute)",
+    "place": "Southaven (DeSoto County), Mississippi",
+    "state": "MS",
+    "mw": null,
+    "mw_note": "Part of ~500 MW across Colossus 1 + 2",
+    "status": "operating",
+    "status_note": "Operating for Anthropic since May 2026",
+    "confidence": "Third-party reporting; location not stated by Anthropic",
+    "note": "Site assignment per third-party reporting"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -78.603,
+     43.358
+    ]
+   },
+   "properties": {
+    "id": "lake-mariner",
+    "name": "Lake Mariner",
+    "host": "TeraWulf",
+    "partner": "Fluidstack (Anthropic tenant)",
+    "place": "Barker, New York",
+    "state": "NY",
+    "mw": 378,
+    "mw_note": "378 MW contracted; first 42 MW online July 2026",
+    "status": "operating",
+    "status_note": "Partly online (July 2026); more halls due late 2026–2027",
+    "confidence": "Reported; site matches Anthropic's Nov 2025 'New York' announcement",
+    "note": "Anthropic did not name the exact New York site"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -100.865,
+     32.388
+    ]
+   },
+   "properties": {
+    "id": "barber-lake",
+    "name": "Barber Lake",
+    "host": "Cipher Digital",
+    "partner": "Fluidstack (Anthropic tenant)",
+    "place": "Colorado City (Mitchell County), Texas",
+    "state": "TX",
+    "mw": 207,
+    "mw_note": "207 MW; first 168 MW phase targeted Sept 30, 2026",
+    "status": "development",
+    "status_note": "First phase targeted Sept 30, 2026",
+    "confidence": "Reported; Texas site per Anthropic's Nov 2025 announcement is not named",
+    "note": "Anthropic did not name the exact Texas site"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -101.843,
+     33.832
+    ]
+   },
+   "properties": {
+    "id": "abernathy",
+    "name": "Abernathy HPC campus",
+    "host": "Fluidstack-led investor group",
+    "partner": "Fluidstack (Anthropic tenant)",
+    "place": "Abernathy (Hale County), Texas",
+    "state": "TX",
+    "mw": 168,
+    "mw_note": "168 MW reported",
+    "status": "development",
+    "status_note": "Expected to begin delivering in 2H 2026",
+    "confidence": "Reported; Anthropic tie is per third-party tracker",
+    "note": "Anthropic did not name the exact Texas site"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -91.35,
+     30.77
+    ]
+   },
+   "properties": {
+    "id": "river-bend",
+    "name": "River Bend campus",
+    "host": "Hut 8",
+    "partner": "Fluidstack (Anthropic tenant)",
+    "place": "St. Francisville (West Feliciana Parish), Louisiana",
+    "state": "LA",
+    "mw": 245,
+    "mw_note": "245 MW contracted",
+    "status": "development",
+    "status_note": "Pre-delivery; first 65 MW hall targeted Q2 2027",
+    "confidence": "Reported",
+    "note": "Location approximate (near St. Francisville)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -87.45,
+     39.07
+    ]
+   },
+   "properties": {
+    "id": "meridian-arc",
+    "name": "Meridian Arc",
+    "host": "Meridian Compute JV (Fluidstack / Next Frontier)",
+    "partner": "Fluidstack (Anthropic tenant)",
+    "place": "New Lebanon (Sullivan County), Indiana",
+    "state": "IN",
+    "mw": 430,
+    "mw_note": "≈430 MW across two buildings",
+    "status": "development",
+    "status_note": "Planned; first 65 MW hall targeted July 2027",
+    "confidence": "Reported",
+    "note": "Location approximate (county-level)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -86.748,
+     37.9
+    ]
+   },
+   "properties": {
+    "id": "justified",
+    "name": "Justified Data Campus",
+    "host": "TeraWulf",
+    "partner": "Direct lease (Anthropic tenant)",
+    "place": "Hawesville (Hancock County), Kentucky",
+    "state": "KY",
+    "mw": 401,
+    "mw_note": "401 MW",
+    "status": "development",
+    "status_note": "Under development; first capacity 2H 2027, full early 2028",
+    "confidence": "Reported",
+    "note": "Anthropic is the named tenant"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -97.001,
+     30.655
+    ]
+   },
+   "properties": {
+    "id": "rockdale",
+    "name": "Rockdale campus",
+    "host": "Riot Platforms",
+    "partner": "Direct lease (Anthropic tenant)",
+    "place": "Rockdale (Milam County), Texas",
+    "state": "TX",
+    "mw": 191,
+    "mw_note": "191 MW at full build",
+    "status": "development",
+    "status_note": "Land cleared; 96 MW targeted Dec 2027, 191 MW by June 2028",
+    "confidence": "Reported",
+    "note": "Anthropic is the named tenant"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -96.796,
+     31.842
+    ]
+   },
+   "properties": {
+    "id": "nexus-hubbard",
+    "name": "Nexus Hubbard",
+    "host": "Nexus Data Centers",
+    "partner": "Direct lease (Anthropic tenant; Google-backed)",
+    "place": "Hubbard (Hill County), Texas",
+    "state": "TX",
+    "mw": 500,
+    "mw_note": "≈500 MW first phase; campus could reach ~7.7 GW",
+    "status": "development",
+    "status_note": "Under construction; first delivery expected Q4 2027",
+    "confidence": "Reported; Google guarantees Anthropic's lease",
+    "note": "Anthropic is the named tenant"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -82.138,
+     38.845
+    ]
+   },
+   "properties": {
+    "id": "monarch",
+    "name": "Monarch Compute Campus",
+    "host": "Nscale",
+    "partner": "Nscale (owner-operator)",
+    "place": "Point Pleasant (Mason County), West Virginia",
+    "state": "WV",
+    "mw": 460,
+    "mw_note": "460 MW for Anthropic; campus design 1.35 GW",
+    "status": "development",
+    "status_note": "Agreement signed Aug 26, 2026; delivery from late 2027",
+    "confidence": "Reported",
+    "note": "Newest agreement in this list"
+   }
+  }
+ ]
+};
+const STYLE = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"; // CARTO Dark Matter — free, no key. Swap for your own dark style if you prefer.
+
+const map = new maplibregl.Map({
+  container: "map", style: STYLE, attributionControl: false, dragRotate: false, pitchWithRotate: false,
+  bounds: [[-104.5, 28.5], [-73.5, 45.5]],
+  fitBoundsOptions: { padding: { top: 40, bottom: 40, right: 40, left: window.innerWidth > 720 ? 380 : 40 } }
+});
+map.addControl(new maplibregl.AttributionControl({ compact: true }), "bottom-right");
+map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+
+// ---- animated pulsing marker (canvas-drawn StyleImage) ----
+function pulseImage(period, ring, core, glow) {
+  const size = 220;
+  return {
+    width: size, height: size, data: new Uint8Array(size * size * 4),
+    onAdd() { const c = document.createElement("canvas"); c.width = c.height = size; this.ctx = c.getContext("2d"); },
+    render() {
+      const ctx = this.ctx, mid = size / 2, now = performance.now();
+      ctx.clearRect(0, 0, size, size);
+      const coreR = size * 0.085;
+      for (const off of [0, 0.5]) {
+        const t = ((now % period) / period + off) % 1, r = coreR + (mid - coreR) * t;
+        ctx.beginPath(); ctx.arc(mid, mid, r, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(${ring},${(1 - t) * 0.9})`; ctx.lineWidth = 5 * (1 - t) + 1; ctx.stroke();
+        ctx.fillStyle = `rgba(${ring},${(1 - t) * 0.16})`; ctx.fill();
+      }
+      const g = ctx.createRadialGradient(mid, mid, 0, mid, mid, coreR * 2.6);
+      g.addColorStop(0, `rgba(${glow},.55)`); g.addColorStop(1, `rgba(${glow},0)`);
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(mid, mid, coreR * 2.6, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(mid, mid, coreR, 0, Math.PI * 2);
+      ctx.fillStyle = `rgb(${core})`; ctx.fill(); ctx.strokeStyle = "rgba(255,255,255,.85)"; ctx.lineWidth = 2; ctx.stroke();
+      this.data = ctx.getImageData(0, 0, size, size).data;
+      map.triggerRepaint();
+      return true;
+    }
+  };
+}
+
+const feats = DATA.features;
+const gw = feats.reduce((a, f) => a + (f.properties.mw || 0), 0) / 1000;
+document.getElementById("s-n").textContent = feats.length;
+document.getElementById("s-op").textContent = feats.filter(f => f.properties.status === "operating").length;
+document.getElementById("s-gw").textContent = gw.toFixed(1);
+
+map.on("load", () => {
+  map.addImage("pulse-op",  pulseImage(1500, "255,42,58", "255,42,58", "255,42,58"), { pixelRatio: 2 });
+  map.addImage("pulse-dev", pulseImage(2800, "224,70,84", "194,32,46", "194,32,46"), { pixelRatio: 2 });
+  map.addSource("dc", { type: "geojson", data: DATA });
+  const sz = ["interpolate", ["linear"], ["coalesce", ["get", "mw"], 150], 150, 0.62, 500, 0.9, 1100, 1.35];
+  map.addLayer({ id: "glow", type: "circle", source: "dc", paint: {
+    "circle-color": "#ff1f31", "circle-blur": 1, "circle-opacity": 0.16,
+    "circle-radius": ["interpolate", ["linear"], ["zoom"], 3, 14, 6, 26, 10, 44]
+  }});
+  map.addLayer({ id: "pulse", type: "symbol", source: "dc", layout: {
+    "icon-image": ["case", ["==", ["get", "status"], "operating"], "pulse-op", "pulse-dev"],
+    "icon-size": ["interpolate", ["linear"], ["zoom"], 3, ["*", sz, 0.75], 8, ["*", sz, 1.15]],
+    "icon-allow-overlap": true, "icon-ignore-placement": true
+  }});
+
+  const pop = new maplibregl.Popup({ maxWidth: "310px", offset: 18 });
+  const tip = new maplibregl.Popup({ closeButton: false, closeOnClick: false, className: "hover", offset: 14 });
+  const show = f => {
+    const p = f.properties;
+    const html = `<div class="pop"><h3>${esc(p.name)}</h3><div class="co">${esc(p.partner)}</div>
+      <div class="row">${esc(p.place)}</div>
+      <div class="row"><span class="k">Host:</span> ${esc(p.host)}</div>
+      <div class="row"><span class="k">Capacity:</span> ${esc(p.mw_note)}</div>
+      <div class="row"><span class="k">Status:</span> ${esc(p.status_note)}</div>
+      <div class="note">${esc(p.confidence)}. ${esc(p.note)}. Location approximate.</div></div>`;
+    pop.setLngLat(f.geometry.coordinates).setHTML(html).addTo(map);
+    document.querySelectorAll(".item").forEach(el => el.classList.toggle("on", el.dataset.id === p.id));
+  };
+  map.on("click", "pulse", e => { tip.remove(); show(e.features[0]); });
+  map.on("mousemove", "pulse", e => {
+    map.getCanvas().style.cursor = "pointer";
+    tip.setLngLat(e.features[0].geometry.coordinates).setHTML(esc(e.features[0].properties.name)).addTo(map);
+  });
+  map.on("mouseleave", "pulse", () => { map.getCanvas().style.cursor = ""; tip.remove(); });
+
+  const list = document.getElementById("list");
+  [...feats].sort((a, b) => (b.properties.status === "operating") - (a.properties.status === "operating") || (b.properties.mw || 0) - (a.properties.mw || 0))
+    .forEach(f => {
+      const p = f.properties, el = document.createElement("div");
+      el.className = "item"; el.dataset.id = p.id;
+      el.innerHTML = `<div class="n">${esc(p.name)}<span class="tag ${p.status}">${p.status === "operating" ? "operating" : "in development"}</span></div>
+        <div class="m">${esc(p.place)} · ${esc(p.partner)}</div>`;
+      el.onclick = () => { tip.remove(); map.flyTo({ center: f.geometry.coordinates, zoom: 7.5, speed: 0.9 }); map.once("moveend", () => show(f)); };
+      list.appendChild(el);
+    });
+});
+</script>
+</body>
+</html>
